@@ -81,19 +81,17 @@ fn main() {
             ColorScheme::Dark
         },
     ));
-    let (bg_is_dark, name) = match cs {
-        ColorScheme::Dark => (true, "Dark"),
-        ColorScheme::Light => (false, "Light"),
-    };
-
-    let global_env = if bg_is_dark {
-        cfg.dark.env
-    } else {
-        cfg.light.env
+    let global_env = match cs {
+        ColorScheme::Dark => cfg.dark.env,
+        ColorScheme::Light => cfg.light.env,
     };
 
     match bin.command {
         Commands::Print => {
+            let name = match cs {
+                ColorScheme::Dark => "Dark",
+                ColorScheme::Light => "Light",
+            };
             println!("{}", name);
         }
         Commands::Env { no_export } => {
@@ -115,10 +113,9 @@ fn main() {
                 .expect("Command name not utf8");
 
             if let Some(cmd_conf) = cfg.cmds.get(command_name) {
-                let cmd_conf_bg = if bg_is_dark {
-                    &cmd_conf.dark
-                } else {
-                    &cmd_conf.light
+                let cmd_conf_bg = match cs {
+                    ColorScheme::Dark => &cmd_conf.dark,
+                    ColorScheme::Light => &cmd_conf.light,
                 };
 
                 command.args(&cmd_conf_bg.pre_args);
