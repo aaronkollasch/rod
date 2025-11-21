@@ -1,3 +1,4 @@
+use std::fs::read_to_string;
 use std::path::Path;
 use std::{os::unix::process::CommandExt, process::Command};
 
@@ -62,15 +63,27 @@ fn main() {
 
     let cfg = config::Config::parse();
 
-    let (bg_is_dark, name) = if ColorScheme::Dark
-        == color_scheme(QueryOptions::default()).unwrap_or(if cfg.fallback_to_light {
+    let override_path = dirs::config_dir()
+        .expect("Config Path doesn't exist")
+        .join("rod")
+        .join("override")
+        .into_os_string();
+    let override_string = read_to_string(override_path).unwrap_or("".to_string());
+    let override_state = match override_string.as_str().trim_end() {
+        "Dark" => Some(ColorScheme::Dark),
+        "Light" => Some(ColorScheme::Light),
+        _ => None,
+    };
+    let cs = override_state.unwrap_or(color_scheme(QueryOptions::default()).unwrap_or(
+        if cfg.fallback_to_light {
             ColorScheme::Light
         } else {
             ColorScheme::Dark
-        }) {
-        (true, "Dark")
-    } else {
-        (false, "Light")
+        },
+    ));
+    let (bg_is_dark, name) = match cs {
+        ColorScheme::Dark => (true, "Dark"),
+        ColorScheme::Light => (false, "Light"),
     };
 
     let global_env = if bg_is_dark {
