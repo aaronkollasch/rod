@@ -41,9 +41,10 @@ endy
 
 #### zsh:
 ```bash
-preexec () {
-    rod env | source
+_rod_preexec () {
+    rod env | source /dev/fd/0
 }
+typeset -ga preexec_functions=($preexec_functions _rod_preexec)
 ```
 
 #### bash
