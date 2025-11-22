@@ -74,13 +74,13 @@ fn main() {
         "Light" => Some(ColorScheme::Light),
         _ => None,
     };
-    let cs = override_state.unwrap_or(color_scheme(QueryOptions::default()).unwrap_or(
-        if cfg.fallback_to_light {
+    let cs = override_state.unwrap_or_else(|| {
+        color_scheme(QueryOptions::default()).unwrap_or(if cfg.fallback_to_light {
             ColorScheme::Light
         } else {
             ColorScheme::Dark
-        },
-    ));
+        })
+    });
     let global_env = match cs {
         ColorScheme::Dark => cfg.dark.env,
         ColorScheme::Light => cfg.light.env,
